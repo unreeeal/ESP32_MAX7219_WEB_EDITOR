@@ -1,0 +1,1090 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <title>LED ESP32</title>
+
+    <meta charset="UTF-8">
+    
+
+    <link rel="icon" type="image/png" href="img/icon.png" />
+    <style>
+        @media only screen and (min-height: 900px) {
+            #frames {
+                height: 400px;
+            }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="lib/bootstrap/css/bootstrap-theme.min.css">-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" integrity="sha256-46qynGAkLSFpVbEBog43gvNhfrOj+BmwXdxFgVK/Kvc=" crossorigin="anonymous" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha256-oE03O+I6Pzff4fiMqwEGHbdfcW7a3GRRxlL+U49L5sA=" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background: #eee;
+        }
+
+        #cols-list,
+        #rows-list,
+        #leds-matrix {
+            font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+            border-spacing: 5px;
+            border-collapse: separate;
+        }
+
+            #leds-matrix .item,
+            #cols-list .item,
+            #rows-list .item {
+                width: 25px;
+                min-width: 25px;
+                max-width: 25px;
+                height: 25px;
+                min-height: 25px;
+                max-height: 25px;
+                cursor: pointer;
+                font-size: 17px;
+            }
+
+            #leds-matrix .item {
+                border-radius: 50%;
+                box-shadow: inset 0 0 1px #666666;
+                background: #808080 radial-gradient(ellipse at 42% 42%, #999999 0%, #808080 50%);
+            }
+
+        #leds-matrix {
+            background-color: #333;
+            box-shadow: 1px 1px 10px #333;
+        }
+
+        body.red-leds #matrix-toggle:hover,
+        body.red-leds #cols-list .item:hover,
+        body.red-leds #rows-list .item:hover,
+        body.red-leds #cols-list .item.hover,
+        body.red-leds #rows-list .item.hover {
+            color: #ff3333;
+            font-weight: bold;
+        }
+
+        #red-leds-case,
+        body.red-leds #frames .item.active,
+        body.red-leds #leds-matrix .item.active {
+            background: #ff0000 radial-gradient(ellipse at 42% 42%, #ffffff 0%, #ff3300 25%, #ff0000 50%);
+        }
+
+        body.yellow-leds #matrix-toggle:hover,
+        body.yellow-leds #cols-list .item:hover,
+        body.yellow-leds #rows-list .item:hover,
+        body.yellow-leds #cols-list .item.hover,
+        body.yellow-leds #rows-list .item.hover {
+            color: #ffcc33;
+            font-weight: bold;
+        }
+
+        #yellow-leds-case,
+        body.yellow-leds #frames .item.active,
+        body.yellow-leds #leds-matrix .item.active {
+            background: #ffcc00 radial-gradient(ellipse at 42% 42%, #ffffff 0%, #ffcc00 25%, #ffcc00 50%);
+        }
+
+        body.green-leds #matrix-toggle:hover,
+        body.green-leds #cols-list .item:hover,
+        body.green-leds #rows-list .item:hover,
+        body.green-leds #cols-list .item.hover,
+        body.green-leds #rows-list .item.hover {
+            color: #33ff33;
+            font-weight: bold;
+        }
+
+        #green-leds-case,
+        body.green-leds #frames .item.active,
+        body.green-leds #leds-matrix .item.active {
+            background: #00ff00 radial-gradient(ellipse at 42% 42%, #ffffff 0%, #00ff33 25%, #00ff00 50%);
+        }
+
+        body.blue-leds #matrix-toggle:hover,
+        body.blue-leds #cols-list .item:hover,
+        body.blue-leds #rows-list .item:hover,
+        body.blue-leds #cols-list .item.hover,
+        body.blue-leds #rows-list .item.hover {
+            color: #0033ff;
+            font-weight: bold;
+        }
+
+        #blue-leds-case,
+        body.blue-leds #frames .item.active,
+        body.blue-leds #leds-matrix .item.active {
+            background: #0000ff radial-gradient(ellipse at 42% 42%, #ffffff 0%, #0033ff 25%, #0000ff 50%);
+        }
+
+        body.white-leds #matrix-toggle:hover,
+        body.white-leds #cols-list .item:hover,
+        body.white-leds #rows-list .item:hover,
+        body.white-leds #cols-list .item.hover,
+        body.white-leds #rows-list .item.hover {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        #white-leds-case,
+        body.white-leds #frames .item.active,
+        body.white-leds #leds-matrix .item.active {
+            background: #ffffff radial-gradient(ellipse at 42% 42%, #ffffff 0%, #eeeeee 25%, #ffffff 50%);
+        }
+
+        #player {
+            display: inline-block;
+            padding: 10px;
+        }
+
+        #play-delay-input {
+            height: 25px;
+            width: 65px;
+            padding: 5px;
+        }
+
+        #hex-input {
+            text-align: center;
+            width: 150px;
+            height: 30px;
+            padding: 5px;
+        }
+
+        #edit-buttons-container {
+            padding: 10px;
+        }
+
+        #shift-buttons-container {
+            display: inline-block;
+            position: relative;
+            box-sizing: content-box;
+            width: 130px;
+            height: 130px;
+        }
+
+        #insert-button,
+        #update-button,
+        #delete-button {
+            width: 75px;
+            height: 30px;
+            margin: 0 10px;
+        }
+
+        #rotate-button,
+        #rotate-back-button,
+        #invert-button,
+        #shift-up-button,
+        #shift-right-button,
+        #shift-down-button,
+        #shift-left-button {
+            position: absolute;
+            height: 30px;
+            width: 30px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .leds-case {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: inset 0 0 1px #333333;
+            background: #cccccc radial-gradient(circle at center, lightgray 0%, darkgray 100%);
+        }
+
+            #leds-matrix .item:hover,
+            .leds-case:hover {
+                box-shadow: 0 0 1px #cccccc;
+            }
+
+        #circuit-theme {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            background-image: url('img/circuit-icon.png');
+            margin-left: 25px;
+        }
+
+        #frames {
+            padding: 5px;
+            height: 200px;
+            overflow-y: scroll;
+            text-align: left;
+            border: solid #666666 1px;
+            background: #ccc linear-gradient(#ccc, #aaa)
+        }
+
+            #frames .frame {
+                margin: 2px;
+                display: inline-block;
+                background-color: #333;
+                border-spacing: 2px;
+                border-collapse: separate;
+                border: solid #ccc 3px;
+                max-height: 80px;
+            }
+
+                #frames .frame .item {
+                    width: 7px;
+                    height: 7px;
+                    border-radius: 50%;
+                    box-shadow: inset 0 0 1px #333333;
+                    background: #808080;
+
+                }
+
+                #frames .frame.selected {
+                    border-color: #3399ff;
+                }
+
+        #output {
+            font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+            resize: none;
+            padding: 5px;
+            height: 280px;
+            overflow-y: scroll;
+        }
+
+        /*Themes*/
+
+        .circuit-theme #circuit {
+            background-image: url('img/circuit.jpg');
+            padding: 5px;
+        }
+
+        .circuit-theme #matrix {
+            color: white;
+            border: solid 1px #547eae;
+            background-color: #26477a;
+            box-shadow: 10px 10px 10px #333;
+            margin: 10px;
+        }
+
+        .circuit-theme #leds-container {
+            border: solid 1px #808080;
+        }
+
+        .circuit-theme #player,
+        .circuit-theme #shift-buttons-container,
+        .circuit-theme #edit-buttons-container {
+            background-color: #26477a;
+            border: solid 1px #547eae;
+            box-shadow: 10px 10px 10px #333;
+        }
+
+            .circuit-theme #player label,
+            .circuit-theme #ms,
+            .circuit-theme #shift-buttons-container label,
+            .circuit-theme #edit-buttons-container label {
+                color: white;
+            }
+
+        #circuit, #frames {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+    </style>
+    <style>
+        .hljs {
+            color: #a9b7c6;
+            background: #282b2e;
+            display: block;
+            overflow-x: auto;
+            padding: 0.5em;
+        }
+
+        .hljs-number,
+        .hljs-literal,
+        .hljs-symbol,
+        .hljs-bullet {
+            color: #6897BB;
+        }
+
+        .hljs-keyword,
+        .hljs-selector-tag,
+        .hljs-deletion {
+            color: #cc7832;
+        }
+
+        .hljs-variable,
+        .hljs-template-variable,
+        .hljs-link {
+            color: #629755;
+        }
+
+        .hljs-comment,
+        .hljs-quote {
+            color: #808080;
+        }
+
+        .hljs-meta {
+            color: #bbb529;
+        }
+
+        .hljs-string,
+        .hljs-attribute,
+        .hljs-addition {
+            color: #6A8759;
+        }
+
+        .hljs-section,
+        .hljs-title,
+        .hljs-type {
+            color: #ffc66d;
+        }
+
+        .hljs-name,
+        .hljs-selector-id,
+        .hljs-selector-class {
+            color: #e8bf6a;
+        }
+
+        .hljs-emphasis {
+            font-style: italic;
+        }
+
+        .hljs-strong {
+            font-weight: bold;
+        }
+    </style>
+
+
+
+</head>
+
+<body class="red-leds plain-theme">
+
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container-fluid">
+          
+
+            <div class="navbar-text pull-right" style="margin-top: 10px; margin-bottom: 5px;">
+                <div id="red-leds-case" class="leds-case" data-leds-theme="red-leds"></div>
+                <div id="yellow-leds-case" class="leds-case" data-leds-theme="yellow-leds"></div>
+                <div id="green-leds-case" class="leds-case" data-leds-theme="green-leds"></div>
+                <div id="blue-leds-case" class="leds-case" data-leds-theme="blue-leds"></div>
+                <div id="white-leds-case" class="leds-case" data-leds-theme="white-leds"></div>
+                <div id="circuit-theme" title="Switch matrix theme"></div>
+            </div>
+           
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-6 col-md-3 debug">
+                <h3>Library</h3>
+                <ul id="sets">
+                    <li>
+                        Set 1:
+                        <a href="#7e1818181c181800|7e060c3060663c00|3c66603860663c00|30307e3234383000|3c6660603e067e00|3c66663e06663c00|1818183030667e00|3c66663c66663c00|3c66607c66663c00|3c66666e76663c00">
+                            Digits
+                        </a> /
+                        <a href="#6666667e66663c00|3e66663e66663e00|3c66060606663c00|3e66666666663e00|7e06063e06067e00|0606063e06067e00|3c66760606663c00|6666667e66666600|3c18181818183c00|1c36363030307800|66361e0e1e366600|7e06060606060600|c6c6c6d6feeec600|c6c6e6f6decec600|3c66666666663c00|06063e6666663e00|603c766666663c00|66361e3e66663e00|3c66603c06663c00|18181818185a7e00|7c66666666666600|183c666666666600|c6eefed6c6c6c600|c6c66c386cc6c600|1818183c66666600|7e060c1830607e00|
+                            0000000000000000|7c667c603c000000|3e66663e06060600|3c6606663c000000|7c66667c60606000|3c067e663c000000|0c0c3e0c0c6c3800|3c607c66667c0000|6666663e06060600|3c18181800180000|1c36363030003000|66361e3666060600|1818181818181800|d6d6feeec6000000|6666667e3e000000|3c6666663c000000|06063e66663e0000|f0b03c36363c0000|060666663e000000|3e403c027c000000|1818187e18180000|7c66666666000000|183c666600000000|7cd6d6d6c6000000|663c183c66000000|3c607c6666000000|3c0c18303c000000">
+                            Letters
+                        </a> /
+                        <a href="#0010107c10100000|0000003c00000000|006c38fe386c0000|00060c1830600000|60660c1830660600|00003c003c000000|000000365c000000|0000008244281000|6030180c18306000|060c1830180c0600|6030181818306000|060c1818180c0600|7818181818187800|1e18181818181e00|7018180c18187000|0e18183018180e00|0606000000000000|0018180018180000|0c18180018180000|060c0c0c00000000|180018183c3c1800|1800183860663c00|003c421a3a221c00|fc66a6143c663c00|103c403804781000|6c6cfe6cfe6c6c00|383838fe7c381000|10387cfe38383800|10307efe7e301000|1018fcfefc181000|fefe7c7c38381000|1038387c7cfefe00|061e7efe7e1e0600|c0f0fcfefcf0c000|7c92aa82aa827c00|7ceed6fed6fe7c00|10387cfefeee4400|10387cfe7c381000|381054fe54381000|38107cfe7c381000|00387c7c7c380000|ffc7838383c7ffff|0038444444380000|ffc7bbbbbbc7ffff|0c12129ca0c0f000|38444438107c1000|060e0c0808281800|066eecc88898f000|105438ee38541000|1038541054381000|6666006666666600|002844fe44280000|00000000286c6c00|006030180c060000|0000000060303000|0000000c18181800|fe8282c66c381000">
+                            Signs
+                        </a>
+                    </li>
+                    <li>
+                        Set 2:
+                        <a href="#003f0c0c0c0c0e0c|003f33061c30331e|001e33301c30331e|0078307f33363c38|001e3330301f033f|001e33331f03061c|000c0c0c1830333f|001e33331e33331e|000e18303e33331e|003e676f7b73633e">
+                            Digits
+                        </a> /
+                        <a href="#0033333f33331e0c|003f66663e66663f|003c66030303663c|001f36666666361f|007f46161e16467f|000f06161e16467f|007c66730303663c|003333333f333333|001e0c0c0c0c0c1e|001e333330303078|006766361e366667|007f66460606060f|0063636b7f7f7763|006363737b6f6763|001c36636363361c|000f06063e66663f|00381e3b3333331e|006766363e66663f|001e33380e07331e|001e0c0c0c0c2d3f|003f333333333333|000c1e3333333333|0063777f6b636363|0063361c1c366363|001e0c0c1e333333|007f664c1831637f|
+                            0000000000000000|006e333e301e0000|003b66663e060607|001e3303331e0000|006e33333e303038|001e033f331e0000|000f06060f06361c|1f303e33336e0000|006766666e360607|001e0c0c0c0e000c|1e33333030300030|0067361e36660607|001e0c0c0c0c0c0e|00636b7f7f330000|00333333331f0000|001e3333331e0000|0f063e66663b0000|78303e33336e0000|000f06666e3b0000|001f301e033e0000|00182c0c0c3e0c08|006e333333330000|000c1e3333330000|00367f7f6b630000|0063361c36630000|1f303e3333330000|003f260c193f0000">
+                            Letters
+                        </a> /
+                        <a href="#00000c0c3f0c0c00|000000003f000000|0000663cff3c6600|000103060c183060|0063660c18336300|00003f00003f0000|0000000000003b6e|0000000063361c08|00180c0603060c18|00060c1830180c06|00180c0606060c18|00060c1818180c06|001e06060606061e|001e18181818181e|00380c0c070c0c38|00070c0c380c0c07|000c0c0000000000|000c0c00000c0c00|060c0c00000c0c00|060c0c0000000000|00180018183c3c18|000c000c1830331e|001e037b7b7b633e|006e333b6e1c361c|000c1f301e033e0c|0036367f367f3636|00406030180c0603|0000000000180c0c|0000000000030606">
+                            Signs
+                        </a> /
+                        <a href="#18187e03037e1818|003f67060f26361c|0c0c3f0c3f1e3333|1e331c36361cc67c|3c4299858599423c|0000cc663366cc00|3c42a59da59d423c|007e0018187e1818|000000001c36361c|000000001c080c08|0000003c0c18301c|0000001c3018301c|03063e6666660000|00d8d8d8dedbdbfe|00003366cc663300|03f3f6ecbd3363c3|f03366cc7b3363c3|80e6acdbb463c403|001e3303060c000c|00637f63361c0007|00637f63361c0070|00637f633e00361c|00637f633e003b6e|0063637f63361c63|00333f331e000c0c|007333337f33367c|1e30181e3303331e|003f061e063f0007|003f061e063f0038|003f061e063f120c|003f061e063f0036|001e0c0c0c1e0007|001e0c0c0c1e0038|001e0c0c1e00120c|001e0c0c0c1e0033|003f66666f6f663f|00333b3f3733003f|00183c663c18000e|00183c663c180070|00183c663c18663c|003e63633e003b6e|00183c66663c18c3|0000361c081c3600|001d366f7b73365c|003c66666666000e|003c666666660070|003c66666600663c|001e333333330033|0018183c66660070|0f063e66663e060f|03031f331f331e00|007e333e301e0007|007e333e301e0038|00fc667c603cc37e|007e333e301e3b6e|007e333e301e0033|007e333e301e0c0c|00fe33fe30fe0000|1c301e03031e0000|001e033f331e0007|001e033f331e0038|003c067e663cc37e|001e033f331e0033|001e0c0c0c0e0007|001e0c0c0c0e001c|003c1818181c633e|001e0c0c0c0e0033|001e333e301b0e1b|003333331f001f00|001e33331e000700|001e33331e003800|001e33331e00331e|001e33331e003b6e|001e33331e003300|063c6e7e763c6000|007e333333000700|007e333333003800|007e33333300331e|007e333333003300|1f303e3333003800|00063e663e060000|1f303e3333003300">
+                            Other
+                        </a>
+                    </li>
+                    <li>
+                        Set 3:
+                        <a href="#1c08080808080c08|3e0408102020221c|1c2220201820221c|20203e2224283020|1c2220201e02023e|1c2222221e02221c|040404081020203e|1c2222221c22221c|1c22203c2222221c|1c2222222222221c">
+                            Digits
+                        </a> /
+                        <a href="#5554545050404000|3f21212121212121|3f212d2121212121|3f212d212d212121|3f212d212d212d21|3f212d2d2d212121|3f212d2d2d2d2d2d|00040a1120408000|081c3e7f1c1c1c1c|0010307fff7f3010|1c1c1c1c7f3e1c08|00080cfefffe0c08">
+                            Icons
+                        </a>
+                    </li>
+                </ul>
+                <div>
+               
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-3 col-md-push-6 debug">
+                <div class="checkbox pull-right" style="margin-top: 25px;">
+                    <label> <input type="checkbox" id="images-as-byte-arrays"> As byte arrays </label>
+                </div>
+
+                <h3>Arduino/C code</h3>
+
+                <textarea id="output" spellcheck="false" style="width: 100%;"></textarea>
+
+            </div>
+
+            <div id="circuit" class="col-xs-12 col-md-6 col-md-pull-3 text-center debug">
+                <table style="display: inline-block;">
+                    <tr>
+                        <td>
+                            <table id="matrix">
+                                <tr>
+                                    <td id="matrix-toggle" title="Select/Clear all elements">
+                                        <span class="fa fa-th-large"></span>
+                                    </td>
+                                    <td>
+                                        <div id="cols-container"></div>
+                                    </td>
+                                    <td style="width: 15px;"></td>
+                                </tr>
+                                <tr>
+                                    <td id="rows-container"></td>
+                                    <td id="leds-container"></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td style="height: 15px;"></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td>
+                            <div id="player">
+                                <label for="play-delay-input" style="padding-right: 10px;">Play </label>
+                                <input id="play-delay-input" type="number" min="100" value="500">
+                                <small id="ms"> ms.</small>
+                                <button id="play-button">
+                                    <span id="play-button-play" class="fa fa-play"></span>
+                                    <span id="play-button-stop" style="display: none"
+                                          class="fa fa-stop"></span>
+                                </button>
+                            </div>
+                            <div style="height: 25px;"></div>
+                            <div id="shift-buttons-container">
+                                <button id="shift-up-button" style="top:10px; left:50px;" title="Shift matrix up">
+                                    <span class="fa fa-chevron-up"></span>
+                                </button>
+                                <button id="shift-right-button" style="top:50px; left:90px;" title="Shift matrix right">
+                                    <span class="fa fa-chevron-right"></span>
+                                </button>
+                                <button id="shift-down-button" style="top:90px; left:50px;" title="Shift matrix down">
+                                    <span class="fa fa-chevron-down"></span>
+                                </button>
+                                <button id="shift-left-button" style="top:50px; left:10px;" title="Shift matrix left">
+                                    <span class="fa fa-chevron-left"></span>
+                                </button>
+                                <button id="invert-button" style="top: 50px; left: 50px;" title="Invert matrix">
+                                    <span class="fa fa-adjust"></span>
+                                </button>
+                                <button id="rotate-back-button" style="top: 10px; left: 10px;"
+                                        title="Rotate matrix counterclock-wise">
+                                    <span class="fa fa-undo"></span>
+                                </button>
+                                <button id="rotate-button" style="top: 10px; left: 90px;"
+                                        title="Rotate matrix clockwise">
+                                    <span class="fa fa-redo"></span>
+                                </button>
+                            </div>
+                            <div style="height: 25px;"></div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            <div id="edit-buttons-container">
+                                <button id="insert-button" title="Insert matrix into the animation">Insert</button>
+                                <button id="update-button" title="Update matrix in the animation">Update</button>
+                                <button id="delete-button" title="Delete matrix from the animation">Delete</button>
+
+                                <label for="hex-input" style="padding: 0 10px 0 25px;">HEX </label>
+                                <input id="hex-input" maxlength="16" placeholder="UINT64 HEX"
+                                       title="Input matrix as a 64-bit number in HEX format">
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+
+
+        <div class="row" style="padding: 5px;">
+            Use Drag-and-Drop to reorder matrices <span class="fa fa-hand-point-down"></span>
+        </div>
+
+        <div id="frames" class="row" style="clear: both; "></div>
+    </div>
+
+    <div class="container">
+        <br />
+        <p class="text-center">
+      
+        </p>
+                
+  
+
+        <p class="text-center">Remixed from
+          <a href="https://xantorohara.github.io/led-matrix-editor/" class="navbar-link">Xantorohara</a>
+        </p>
+
+    </div>
+
+</body>
+
+<script>
+    $(function () {
+    var $body = $('body');
+    var $frames = $('#frames');
+    var $hexInput = $('#hex-input');
+    var $insertButton = $('#insert-button');
+    var $deleteButton = $('#delete-button');
+    var $updateButton = $('#update-button');
+
+    var $leds, $cols, $rows;
+
+    function Bitmap(hexString) {
+        let matrix = fromHexString(hexString);
+
+        function fromHexString(hexString) {
+            const out = [];
+            for (let i = 0; i < hexString.length / 2; i++) {
+                let byte = parseInt(hexString.substr(i * 2, 2), 16).toString(2);
+                byte = ('00000000' + byte).substr(-8);
+                out.push(byte.split('').reverse());
+            }
+            return out.reverse();
+        }
+
+        function toHexString() {
+            const out = [];
+            for (let i = 0; i < matrix.length; i++) {
+                let byte = parseInt(matrix[i].slice().reverse().join(''), 2).toString(16);
+                byte = ('0' + byte).substr(-2);
+                out.push(byte);
+            }
+            return out.reverse().join('');
+        }
+
+        function transpose() {
+            for (let i = 0; i < matrix.length; i++) {
+                for (let j = i; j < 8; j++) {
+                    const tmp = matrix[i][j];
+                    matrix[i][j] = matrix[j][i];
+                    matrix[j][i] = tmp;
+                }
+            }
+        }
+
+        function shiftLeft() {
+            for (let i = 0; i < matrix.length; i++) {
+                const len = matrix[i].length - 1;
+                for (let j = 0; j < len; j++) {
+                    matrix[i][j] = matrix[i][j + 1];
+                }
+                matrix[i][len] = 0;
+            }
+        }
+
+        function shiftRight() {
+            for (let i = 0; i < matrix.length; i++) {
+                const len = matrix[i].length - 1;
+                for (let j = len; j > 0; j--) {
+                    matrix[i][j] = matrix[i][j - 1];
+                }
+                matrix[i][0] = 0;
+            }
+        }
+
+        function rotate() {
+            matrix.reverse();
+            transpose();
+        }
+
+        function rotateBack() {
+            transpose();
+            matrix.reverse();
+        }
+
+        return {
+            toHexString: toHexString,
+            shiftLeft: shiftLeft,
+            shiftRight: shiftRight,
+            rotate: rotate,
+            rotateBack: rotateBack,
+        }
+    }
+
+    var generator = {
+        tableCols: function () {
+            var out = ['<table id="cols-list"><tr>'];
+            for (var i = 1; i < 9; i++) {
+                out.push('<td class="item" data-col="' + i + '">' + i + '</td>');
+            }
+            out.push('</tr></table>');
+            return out.join('');
+        },
+        tableRows: function () {
+            var out = ['<table id="rows-list">'];
+            for (var i = 1; i < 9; i++) {
+                out.push('<tr><td class="item" data-row="' + i + '">' + i + '</td></tr>');
+            }
+            out.push('</table>');
+            return out.join('');
+        },
+        tableLeds: function () {
+            var out = ['<table id="leds-matrix">'];
+            for (var i = 1; i < 9; i++) {
+                out.push('<tr>');
+                for (var j = 1; j < 9; j++) {
+                    out.push('<td class="item" data-row="' + i + '" data-col="' + j + '"></td>');
+                }
+                out.push('</tr>');
+            }
+            out.push('</table>');
+            return out.join('');
+        }
+    };
+
+    var converter = {
+        patternToFrame: function (pattern) {
+            var out = ['<table class="frame" data-hex="' + pattern + '">'];
+            for (var i = 1; i < 9; i++) {
+                var byte = pattern.substr(-2 * i, 2);
+                byte = parseInt(byte, 16);
+
+                out.push('<tr>');
+                for (var j = 0; j < 8; j++) {
+                    if ((byte & 1 << j)) {
+                        out.push('<td class="item active"></td>');
+                    } else {
+                        out.push('<td class="item"></td>');
+                    }
+                }
+                out.push('</tr>');
+            }
+            out.push('</table>');
+            return out.join('');
+        },
+        patternsToCodeUint64Array: function (patterns) {
+            var out = ['const uint64_t IMAGES[] = {\n'];
+
+            for (var i = 0; i < patterns.length; i++) {
+                out.push('  0x');
+                out.push(patterns[i]);
+                out.push(',\n');
+            }
+            out.pop();
+            out.push('\n};\n');
+            out.push('const int IMAGES_LEN = sizeof(IMAGES)/8;\n');
+
+            return out.join('');
+        },
+        patternsToCodeBytesArray: function (patterns) {
+            var out = ['const byte IMAGES[][8] = {\n'];
+
+            for (var i = 0; i < patterns.length; i++) {
+                out.push('{\n');
+                for (var j = 7; j >= 0; j--) {
+                    var byte = patterns[i].substr(2 * j, 2);
+                    byte = parseInt(byte, 16).toString(2);
+                    byte = ('00000000' + byte).substr(-8);
+                    byte = byte.split('').reverse().join('');
+                    out.push('  B');
+                    out.push(byte);
+                    out.push(',\n');
+                }
+                out.pop();
+                out.push('\n}');
+                out.push(',');
+            }
+            out.pop();
+            out.push('};\n');
+            out.push('const int IMAGES_LEN = sizeof(IMAGES)/8;\n');
+            return out.join('');
+        },
+        fixPattern: function (pattern) {
+            pattern = pattern.replace(/[^0-9a-fA-F]/g, '0');
+            return ('0000000000000000' + pattern).substr(-16);
+        },
+        fixPatterns: function (patterns) {
+            for (var i = 0; i < patterns.length; i++) {
+                patterns[i] = converter.fixPattern(patterns[i]);
+            }
+            return patterns;
+        }
+    };
+
+    function makeFrameElement(pattern) {
+        pattern = converter.fixPattern(pattern);
+        return $(converter.patternToFrame(pattern)).click(onFrameClick);
+    }
+       
+    function ledsToHex() {
+        var out = [];
+        for (var i = 1; i < 9; i++) {
+            var byte = [];
+            for (var j = 1; j < 9; j++) {
+                var active = $leds.find('.item[data-row=' + i + '][data-col=' + j + '] ').hasClass('active');
+                byte.push(active ? '1' : '0');
+            }
+            byte.reverse();
+            byte = parseInt(byte.join(''), 2).toString(16);
+            byte = ('0' + byte).substr(-2);
+            out.push(byte);
+        }
+        out.reverse();
+        console.log(out.join(''));
+        $hexInput.val(out.join(''));
+        //sendToESP();
+    }
+
+    function hexInputToLeds() {
+        var val = getInputHexValue();
+        for (var i = 1; i < 9; i++) {
+            var byte = val.substr(-2 * i, 2);
+
+            byte = parseInt(byte, 16);
+            for (var j = 1; j < 9; j++) {
+                var active = !!(byte & 1 << (j - 1));
+                $leds.find('.item[data-row=' + i + '][data-col=' + j + '] ').toggleClass('active', active);
+            }
+        }
+    }
+
+    var savedHashState;
+
+    function printArduinoCode(patterns) {
+        if (patterns.length) {
+            var code;
+            if ($('#images-as-byte-arrays').prop("checked")) {
+                code = converter.patternsToCodeBytesArray(patterns);
+            } else {
+                code = converter.patternsToCodeUint64Array(patterns);
+            }
+            $('#output').val(code);
+        }
+    }
+
+    function framesToPatterns() {
+        var out = [];
+        $frames.find('.frame').each(function () {
+            out.push($(this).attr('data-hex'));
+        });
+        return out;
+    }
+
+    function saveState() {
+        var patterns = framesToPatterns();
+        printArduinoCode(patterns);
+        window.location.hash = savedHashState = patterns.join('|');
+    }
+
+    function loadState() {
+        savedHashState = window.location.hash.slice(1);
+        $frames.empty();
+        var frame;
+        var patterns = savedHashState.split('|');
+        patterns = converter.fixPatterns(patterns);
+
+        for (var i = 0; i < patterns.length; i++) {
+            frame = makeFrameElement(patterns[i]);
+            $frames.append(frame);
+        }
+        frame.addClass('selected');
+        $hexInput.val(frame.attr('data-hex'));
+        printArduinoCode(patterns);
+        hexInputToLeds();
+    }
+
+    function getInputHexValue() {
+        return converter.fixPattern($hexInput.val());
+    }
+
+    function onFrameClick() {
+        $hexInput.val($(this).attr('data-hex'));
+        processToSave($(this));
+        hexInputToLeds();
+    }
+
+    function processToSave($focusToFrame) {
+        $frames.find('.frame.selected').removeClass('selected');
+
+        if ($focusToFrame.length) {
+            $focusToFrame.addClass('selected');
+            $deleteButton.removeAttr('disabled');
+            $updateButton.removeAttr('disabled');
+        } else {
+            $deleteButton.attr('disabled', 'disabled');
+            $updateButton.attr('disabled', 'disabled');
+        }
+        saveState();
+    }
+
+    $('#cols-container').append($(generator.tableCols()));
+    $('#rows-container').append($(generator.tableRows()));
+    $('#leds-container').append($(generator.tableLeds()));
+
+    $cols = $('#cols-list');
+    $rows = $('#rows-list');
+    $leds = $('#leds-matrix');
+
+    $leds.find('.item').mousedown(function () {
+        $(this).toggleClass('active');
+        ledsToHex();
+    });
+
+    $('#invert-button').click(function () {
+        $leds.find('.item').toggleClass('active');
+        ledsToHex();
+    });
+
+    $('#shift-up-button').click(function () {
+        var val = '00' + getInputHexValue().substr(0, 14);
+        $hexInput.val(val);
+        hexInputToLeds();
+    });
+
+    $('#shift-down-button').click(function () {
+        var val = getInputHexValue().substr(2, 14) + '00';
+        $hexInput.val(val);
+        hexInputToLeds();
+    });
+
+    $('#shift-right-button').click(function () {
+        const bitmap = Bitmap(getInputHexValue());
+        bitmap.shiftRight();
+        $hexInput.val(bitmap.toHexString());
+        hexInputToLeds();
+    });
+
+    $('#shift-left-button').click(function () {
+        const bitmap = Bitmap(getInputHexValue());
+        bitmap.shiftLeft();
+        $hexInput.val(bitmap.toHexString());
+        hexInputToLeds();
+    });
+
+
+    $('#rotate-button').click(function () {
+        const bitmap = Bitmap(getInputHexValue());
+        bitmap.rotate();
+        $hexInput.val(bitmap.toHexString());
+        hexInputToLeds();
+    });
+
+    $('#rotate-back-button').click(function () {
+        const bitmap = Bitmap(getInputHexValue());
+        bitmap.rotateBack();
+        $hexInput.val(bitmap.toHexString());
+        hexInputToLeds();
+    });
+
+    $cols.find('.item').mousedown(function () {
+        var col = $(this).attr('data-col');
+        $leds.find('.item[data-col=' + col + ']').toggleClass('active',
+            $leds.find('.item[data-col=' + col + '].active').length != 8);
+        ledsToHex();
+    });
+
+    $rows.find('.item').mousedown(function () {
+        var row = $(this).attr('data-row');
+        $leds.find('.item[data-row=' + row + ']').toggleClass('active',
+            $leds.find('.item[data-row=' + row + '].active').length != 8);
+        ledsToHex();
+    });
+
+    $hexInput.keyup(function () {
+        hexInputToLeds();
+    });
+
+    $deleteButton.click(function () {
+        var $selectedFrame = $frames.find('.frame.selected').first();
+        var $nextFrame = $selectedFrame.next('.frame').first();
+
+        if (!$nextFrame.length) {
+            $nextFrame = $selectedFrame.prev('.frame').first();
+        }
+
+        $selectedFrame.remove();
+
+        if ($nextFrame.length) {
+            $hexInput.val($nextFrame.attr('data-hex'));
+        }
+
+        processToSave($nextFrame);
+
+        hexInputToLeds();
+    });
+
+    $insertButton.click(function () {
+        var $newFrame = makeFrameElement(getInputHexValue());
+        var $selectedFrame = $frames.find('.frame.selected').first();
+
+        if ($selectedFrame.length) {
+            $selectedFrame.after($newFrame);
+        } else {
+            $frames.append($newFrame);
+        }
+
+        processToSave($newFrame);
+    });
+
+    $updateButton.click(function () {
+        var $newFrame = makeFrameElement(getInputHexValue());
+        var $selectedFrame = $frames.find('.frame.selected').first();
+
+        if ($selectedFrame.length) {
+            $selectedFrame.replaceWith($newFrame);
+        } else {
+            $frames.append($newFrame);
+        }
+
+        processToSave($newFrame);
+    });
+
+    $('#images-as-byte-arrays').change(function () {
+        var patterns = framesToPatterns();
+        printArduinoCode(patterns);
+    });
+
+
+    $('#matrix-toggle').hover(function () {
+        $cols.find('.item').addClass('hover');
+        $rows.find('.item').addClass('hover');
+    }, function () {
+        $cols.find('.item').removeClass('hover');
+        $rows.find('.item').removeClass('hover');
+    });
+
+    $('#matrix-toggle').mousedown(function () {
+        var col = $(this).attr('data-col');
+        $leds.find('.item').toggleClass('active', $leds.find('.item.active').length != 64);
+        ledsToHex();
+    });
+
+    $('#circuit-theme').click(function () {
+        if ($body.hasClass('circuit-theme')) {
+            $body.removeClass('circuit-theme');
+            Cookies.set('page-theme', 'plain-theme', {path: ''});
+        } else {
+            $body.addClass('circuit-theme');
+            Cookies.set('page-theme', 'circuit-theme', {path: ''});
+        }
+    });
+
+    $('.leds-case').click(function () {
+        var themeName = $(this).attr('data-leds-theme');
+        setLedsTheme(themeName);
+        Cookies.set('leds-theme', themeName, {path: ''});
+    });
+
+    function setLedsTheme(themeName) {
+        $body.removeClass('red-leds yellow-leds green-leds blue-leds white-leds').addClass(themeName);
+    }
+
+    function setPageTheme(themeName) {
+        $body.removeClass('plain-theme circuit-theme').addClass(themeName);
+    }
+
+    var playInterval;
+
+    $('#play-button').click(function () {
+        if (playInterval) {
+            $('#play-button-stop').hide();
+            $('#play-button-play').show();
+            clearInterval(playInterval);
+            playInterval = null;
+        } else {
+            $('#play-button-stop').show();
+            $('#play-button-play').hide();
+
+            playInterval = setInterval(function () {
+                var $selectedFrame = $frames.find('.frame.selected').first();
+                var $nextFrame = $selectedFrame.next('.frame').first();
+
+                if (!$nextFrame.length) {
+                    $nextFrame = $frames.find('.frame').first();
+                }
+
+                if ($nextFrame.length) {
+                    $hexInput.val($nextFrame.attr('data-hex'));
+                }
+
+                processToSave($nextFrame);
+
+                hexInputToLeds();
+            }, $('#play-delay-input').val());
+        }
+    });
+
+
+    $(window).on('hashchange', function () {
+        if (window.location.hash.slice(1) != savedHashState) {
+            loadState();
+        }
+    });
+
+    $frames.sortable({
+        stop: function (event, ui) {
+            saveState();
+        }
+    });
+
+    loadState();
+
+    var ledsTheme = Cookies.get('leds-theme');
+
+    if (ledsTheme) {
+        setLedsTheme(ledsTheme);
+    }
+
+    var pageTheme = Cookies.get('page-theme') || 'circuit-theme';
+
+    setPageTheme(pageTheme);
+   function sendToESP() {
+        
+        var newHex = getInputHexValue();
+        
+        if (!lastHex.includes(newHex)) {
+            
+            lastHex = newHex;
+             const bitmap = Bitmap(getInputHexValue());
+            bitmap.rotateBack();
+            newHex = bitmap.toHexString()
+            $.getJSON("/matrix?hex=" + newHex, function (data, status) {
+    
+  });
+        }
+    }
+   setInterval(sendToESP, 50);
+});
+
+    hljs.initHighlightingOnLoad();
+    var lastHex = '';
+
+ 
+</script>
+
+
+</html>
